@@ -1,0 +1,40 @@
+{
+  "name": "weex-community",
+  "version": "0.1.0",
+  "description": "A weex project for weex-network-community",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack --watch",
+    "serve": "serve -p 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/planningFor/weex-community.git"
+  },
+  "keywords": [
+    "weex"
+  ],
+  "author": "planningFor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/planningFor/weex-community/issues"
+  },
+  "homepage": "https://github.com/planningFor/weex-community#readme",
+  "devDependencies": {
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.8",
+    "eslint": "^3.10.2",
+    "serve": "^1.4.0",
+    "webpack": "^1.13.3",
+    "weex-loader": "^0.3.4"
+  },
+  "dependencies": {
+    "lodash": "^4.17.2",
+    "weex-components": "^0.2.0",
+    "weex-html5": "^0.4.1"
+  },
+  "optionalDependencies": {
+    "ios-deploy": "^1.9.0"
+  }
+}

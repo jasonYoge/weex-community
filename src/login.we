@@ -1,0 +1,180 @@
+<template>
+    <div class="container">
+        <wxc-navpage class="head" background-color="#3385ff" title="登录" title-color="white" left-item-title="返回" left-item-color="white"></wxc-navpage>
+        <div class="body" style="top: {{marginTop}}">
+            <image id="logo" class="logo" src="http://gw.alicdn.com/tps/i2/TB1DpsmMpXXXXabaXXX20ySQVXX-512-512.png_400x400.jpg"></image>
+            <div id="login"  class="login">
+                <div class="login-row">
+                    <input class="login-input" id="name" value="" onchange="onInputChange" placeholder="请输入用户ID"></input>
+                </div>
+                <div class="login-row login-row-last">
+                    <div class="login-submit" onclick="{{onHandleSubmit}}">
+                        <text>登录</text>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+require('weex-components');
+const animation = require('@weex-module/animation');
+const navigator = require('@weex-module/navigator');
+const stream = require('@weex-module/stream');
+const animQueue = require('./utils/animQueue');
+const modal = require('@weex-module/modal');
+const storage = require('@weex-module/storage');
+const getBaseUrl = require('./utils/getUrl');
+const isPage = require('./utils/baseUtil').isPage;
+
+module.exports = {
+    data: {
+        showPanel: false,
+        marginTop: 0
+    },
+    ready: function () {
+        this.logoRun();
+        // this.loginRun();
+    },
+    created: function () {
+        this.marginTop = isPage(this.$getConfig().bundleUrl);
+
+        this.$on('naviBar.leftItem.click', function () {
+            var params = {
+                'animated': 'true'
+            }
+
+            navigator.pop(params);
+        });
+    },
+    methods: {
+        logoRun: function () {
+            let logo = this.$el('logo');
+            let self = this;
+            //  animQueue module
+            animQueue(logo)
+            .add({
+                styles: {
+                    opacity: 1
+                },
+                duration: 1000,
+                timingFunction: 'ease'
+            }).add({
+                 styles: {
+                    transform: 'translateY(-100px)'
+                },
+                duration: 1000,
+                timingFunction: 'ease'
+            }, function () {
+                self.loginRun();
+            }).execute();
+        },
+        loginRun: function () {
+            let login = this.$el('login');
+
+            animQueue(login)
+            .add({
+                styles: {
+                    opacity: 1
+                },
+                duration: 500,
+                timingFunction: 'linear'
+            }).execute();
+        },
+        onHandleSubmit: function () {
+            let name = this.$el('name').attr.value;
+            let self = this;
+
+            stream.fetch({
+                method: 'GET',
+                url: `http://www.weex.help/api/v1/user/${name}`,
+                type: 'json'
+            }, function (res) {
+                if (res.ok) {
+                    modal.toast({'message': `欢迎回来${name}！`, 'duration': 1});
+                    console.log(res.data);
+                    storage.setItem('loginname', res.data.loginname);
+                    storage.setItem('avatar_url', res.data.avatar_url);
+                    storage.setItem('recent_replies', res.data.recent_replies);
+                    storage.setItem('recent_topic', res.data.recent_topic);
+
+                    setTimeout(function () {
+                        let baseUrl = getBaseUrl(self.$getConfig().bundleUrl);
+                        let url = baseUrl + 'index.js';
+
+                        let params = {
+                            'url': url,
+                            'animated': 'true'
+                        };
+                        navigator.push(params);
+                    }, 1000);
+                } else {
+                    modal.toast({'message': '用户登录失败！', 'duration': 1});
+                }
+            });
+        },
+        onInputChange: function (e) {
+            //  code here
+        }
+    }
+}
+</script>
+
+<style>
+.container {
+    height: 1330;
+    width: 749;
+    overflow: hidden;
+}
+
+.body {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    width: 400;
+    height: 400;
+    opacity: 0;
+    transform: translateY(0px);
+}
+
+.login {
+    transform: translateY(-150px);
+    width: 500;
+    border-radius: 20;
+    opacity: 0;
+}
+
+.login-row {
+    flex-direction: row;
+    padding: 20;
+}
+
+.login-row-last {
+    justify-content: center;
+}
+
+.login-input {
+    flex: 1;
+    background-color: rgba(225, 225, 225, 0.2);
+    font-size: 30;
+    padding: 10;
+    border-radius: 5;
+    color: #aaa;
+}
+
+.login-submit {
+    padding: 12;
+    background-color: #3385ff;
+    width: 400;
+    color: white;
+    text-align: center;
+    border-radius: 10;
+    margin-top: 10;
+    justify-content: center;
+    align-items: center;
+}
+</style>

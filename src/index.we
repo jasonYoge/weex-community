@@ -1,0 +1,37 @@
+<template>
+  <div class="container">
+    <wxc-navpage background-color="#3385ff" title="Weex中文社区" left-item-src="http://192.168.1.240:3000/imgs/search.png" title-color="white"></wxc-navpage>
+    <topic-list></topic-list>
+    <sidebar></sidebar>
+    <wrapper></wrapper>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+</style>
+
+<script>
+  require('weex-components');
+  module.exports = {
+    data: {
+
+    },
+    created: function () {
+        this.$on('naviBar.leftItem.click', function () {
+            this.$broadcast('show');
+        });
+
+        this.$on('hideSidebar', function () {
+            this.$broadcast('hide');
+        });
+    },
+  }
+</script>

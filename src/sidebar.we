@@ -1,0 +1,100 @@
+<template>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-user">
+            <image id="sidebar-img" src="http://placehold.it/200x200" class="sidebar-user-img" onclick="onHandleClick"></image>
+            <text class="sidebar-user-name" onclick="onHandleClick">{{loginname}}</text>
+        </div>
+    </div>
+</template>
+
+<style>
+.sidebar {
+    width: 500;
+    position: absolute;
+    left: -520;
+    top: 0;
+    bottom: 0;
+    z-index: 11;
+    background-color: #7EC0EE;
+    align-items: center;
+}
+
+.sidebar-user {
+    align-items: center;
+    padding-bottom: 50;
+    border-bottom: 2px solid white;
+    width: 450;
+}
+
+.sidebar-user-img {
+    width: 200;
+    height: 200;
+    border: 5px solid white;
+    border-radius: 100;
+    margin-top: 100;
+    background-image: url('http://placehold.it/200x200');
+}
+
+.sidebar-user-name {
+    color: white;
+    margin-top: 30;
+}
+</style>
+
+<script>
+const animation = require('@weex-module/animation');
+const storage = require('@weex-module/storage');
+const navigator = require('@weex-module/navigator');
+const getBaseUrl = require('./utils/getUrl');
+module.exports = {
+    data: {
+        loginname: '请先登录',
+        avatar_url: 'http://placehold.it/200x200',
+        recent_replies: [],
+        recent_topic: []
+    },
+    created: function () {
+        let self = this;
+        this.loginname = storage.getItem('loginname');
+        this.avatar_url = storage.getItem('avatar_url');
+        this.recent_replies = storage.getItem('recent_replies');
+        this.recent_topic = storage.getItem('recent_topic');
+        console.log(storage);
+        console.log(storage.getItem('loginname'));
+        console.log(this.avatar_url);
+        console.log(this.loginname);
+
+        this.$on('show', function () {
+            animation.transition(this.$el('sidebar'), {
+                styles: {
+                    left: 0
+                },
+                duration: 500,
+                timingFunction: 'ease'
+            });
+        });
+
+        this.$on('hide', function () {
+            animation.transition(this.$el('sidebar'), {
+                styles: {
+                    left: -520
+                },
+                duration: 500,
+                timingFunction: 'ease'
+            });
+        });
+    },
+    methods: {
+        onHandleClick: function () {
+            let baseUrl = getBaseUrl(this.$getConfig().bundleUrl);
+            let url = baseUrl + 'login.js';
+
+            let params = {
+                'url': url,
+                'animated': 'true'
+            };
+            navigator.push(params);
+        }
+    }
+}
+</script>

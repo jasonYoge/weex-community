@@ -1,0 +1,132 @@
+<template>
+    <list class="list" style="margin-top: {{marginTop}}">
+      <refresh display="{{refresh_display}}" class="list-fresh" onrefresh="onHandleRefresh">
+          <text style="text-align: center; color: #ddd;" if="{{refresh_display === 'hide'}}">
+              ↓下拉刷新页面
+          </text>
+          <loading-indicator if="{{refresh_display === 'show'}}" class="indicator"></loading-indicator>
+      </refresh>
+      <cell class="list-item" repeat="{{items}}">
+        <topic-item topic_id="{{topic_id}}" author="{{author}}" title="{{title}}" last_reply_at="{{last_reply_at}}"></topic-item>
+      </cell>
+      <loading class="list-loading" display="{{loading_display}}" onloading="onHandleLoading">
+          <text id="addMore" style="text-align: center; color: #ddd;" if="{{loading_display === 'hide'}}">↑加载更多</text>
+          <loading-indicator if="{{loading_display === 'show'}}" class="indicator"></loading-indicator>
+      </loading>
+    </list>
+</template>
+
+<script>
+const stream = require('@weex-module/stream');
+const modal = require('@weex-module/modal');
+const handleIDConflict = require('./utils/baseUtil').handleIDConflict;
+const isPage = require('./utils/baseUtil').isPage;
+const _ = require('lodash');
+
+module.exports = {
+    data: {
+        items: [],
+        marginTop: 0,
+        refresh_display: 'hide',
+        loading_display: 'hide',
+        pageIndex: 1,
+        url: 'http://www.weex.help/api/v1/topics'
+    },
+    created: function () {
+        this.marginTop = isPage(this.$getConfig().bundleUrl);
+        this.fetchData();
+    },
+    methods: {
+        onHandleRefresh: function (e) {
+            let self = this;
+            this.refresh_display = 'show';
+            this.pageIndex = 1;
+        
+            this.items = [];
+            this.fetchData(() => {
+                self.refresh_display = 'hide';
+            });
+        },
+        onHandleLoading: function (e) {
+            let self = this;
+            this.loading_display = 'show';
+            this.pageIndex++;
+
+            this.fetchData(() => {
+                self.loading_display = 'hide';
+            });
+        },
+        fetchData: function (callback) {
+            let self = this;
+
+            stream.fetch({
+                 url: `${self.url}?page=${self.pageIndex}`,
+                 method: 'GET',
+                 type: 'json'
+            },function(res) {
+                if (res.ok) {
+                    let data = res.data.data;
+                    //  handle the conflicts between id and element id
+                    handleIDConflict(data);
+                    if (self.pageIndex === 1) {
+                        self.items = data;
+                        self.refresh_display = 'hide';
+                        return;
+                    } else {
+                        if (data.length === 0) {
+                            modal.toast({'message': '没有更多的数据～', 'duration': 1});
+                            return;
+                        }
+                        self.items = _.union(self.items, data);
+                        self.loading_display = 'hide';
+                    }
+                } else {
+                    modal.toast({'message': '获取数据失败!', 'duration': 1});
+                }
+            });
+        }
+    }
+}
+</script>
+
+<style>
+.list {
+  flex: 1;
+}
+
+.list-item {
+  border: 1px solid #eee;
+}
+
+.list-fresh {
+    background-color: transparent;
+    width: 750;
+    height: 100;
+    display: -ms-flex;
+    display: -webkit-flex;
+    display: flex;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    align-items: center;
+}
+
+.list-loading {
+    background-color: transparent;
+    width: 750;
+    height: 100;
+    display: -ms-flex;
+    display: -webkit-flex;
+    display: flex;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    align-items: center;
+}
+
+.indicator {
+    height: 50;
+    width: 50;
+    color: #889967;
+}
+</style>

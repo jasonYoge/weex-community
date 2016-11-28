@@ -1,0 +1,226 @@
+<template>
+    <div id="main" class="container">
+        <wxc-navpage id="" class="head" background-color="#3385ff" title="主题详情" title-color="white" left-item-title="返回" left-item-color="white"></wxc-navpage>
+        <div if="{{isShow}}" class="content" style="margin-top: {{marginTop}}">
+            <text class="title">{{title}}</text>
+            <div class="title-detail">
+                <image class="user-img" src="{{author.avatar_url}}"></image>
+                <text class="detail">{{author.loginname}} -创建时间：{{create_at}}-访问人数：{{visit_count}}</text>
+            </div>
+            <text class="topic-content">{{content}}</text>
+        </div>
+        <text if="{{isShow}}" class="comments-count">{{reply_count}}  回复</text>
+        <div if="{{isShow}}" class="comments">
+            <div class="comments-item" repeat="{{replies}}" index="{{$index}}">
+                <div class="comments-user">
+                    <image class="comments-user-img" src="{{author.avatar_url}}"></image>
+                    <text class="comments-user-name">{{author.loginname}}</text>
+                    <text class="comments-user-floors">{{$index + 1}}楼</text>
+                </div>
+                <div class="comments-content">
+                    <text>{{content}}</text>
+                </div>
+            </div>
+            <div class="comments-panel">
+                <text class="comments-panel-title">回复楼主：</text>
+                <textarea class="comments-panel-input" placeholder="想对楼主说的话......"></textarea> 
+                <div class="comments-panel-submit">
+                    <text>提交</text>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+require('weex-components');
+const stream = require('@weex-module/stream');
+const dom = require('@weex-module/dom');
+const modal = require('@weex-module/modal');
+const navigator = require('@weex-module/navigator');
+const isPage = require('./utils/baseUtil').isPage;
+const timeReform = require('./utils/baseUtil').timeReform;
+
+module.exports = {
+    data: {
+        isShow: false,
+        author: {
+            avatar_url: '',
+            loginname: ''
+        },
+        content: '',
+        title: '主题详情',
+        marginTop: 0,
+        visit_count: 0,
+        reply_count: 0,
+        create_at: '',
+        replies: []
+    },
+    created: function () {
+        let bundleUrl = this.$getConfig().bundleUrl;
+        let id =this.getParameterByName('id', bundleUrl);
+        let url = 'http://www.weex.help/api/v1/topic/' + id + '?mdrender=false';
+        let self = this;
+        this.marginTop = isPage(bundleUrl);
+
+        this.$on('naviBar.leftItem.click', function () {
+            var params = {
+                'animated': 'true'
+            }
+            console.log(navigator);
+            navigator.pop(params);
+        });
+
+        stream.fetch({
+            url: url,
+            method: 'GET',
+            type: 'json'
+        }, function (res) {
+            if (res.ok) {
+                let data = res.data.data;
+
+                self.title = data.title;
+                self.content = data.content;
+                self.create_at = timeReform(data.create_at);
+                self.author = data.author;
+                self.visit_count = data.visit_count;
+                self.reply_count = data.reply_count;
+                self.replies = data.replies;
+                self.isShow = true;
+            } else {
+                modal.toast({'message': '获取数据失败!', 'duration': 1});
+            }
+        });
+    },
+    methods: {
+        getParameterByName: function (name, url) {
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+    }
+}
+</script>
+
+<style>
+.container {
+    background-color: #eee;
+}
+
+.head {
+    position: absolute;
+    z-index: 20;
+}
+
+.content {
+    text-align: justify;
+    padding: 15;
+    color: #444;
+    padding-bottom: 30;
+    border-bottom: 1px solid #aaa;
+    background-color: white;
+    box-shadow: 0px 5px 5px #ddd;
+    border-bottom-right-radius: 20;
+    border-bottom-left-radius: 20;
+}
+
+.title {
+    font-size: 40;
+    padding: 5;
+}
+
+.title-detail {
+    flex-direction: row;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 30;
+}
+
+.user-img {
+    width: 40;
+    height: 40;
+}
+
+.detail {
+    font-size: 24;
+    padding: 5;
+    color: #aaa;
+}
+
+.topic-content {
+    padding: 5;
+    margin-top: 30;
+}
+
+.comments-count {
+    padding: 20;
+    color: #bbb;
+}
+
+.comments {
+    background-color: white;
+    border-top-right-radius: 20;
+    border-top-left-radius: 20;
+    padding-top: 30;
+}
+
+.comments-item {
+    padding: 30;
+    border-bottom: 1px solid #aaa;
+}
+
+.comments-user {
+    flex-direction: row;
+    align-items: center;
+}
+
+.comments-user-img {
+    width: 80;
+    height: 80;
+    border-radius: 10;
+}
+
+.comments-user-name {
+    line-height: 100;
+    color: #aaa;
+    padding-left: 20;
+}
+
+.comments-user-floors {
+    text-align: right;
+    flex: 1;
+    color: orange;
+}
+
+.comments-content {
+    margin-top: 30;
+}
+
+.comments-panel {
+    padding: 30;
+}
+
+.comments-panel-input {
+    margin-top: 30;
+    border: 2px solid #ccc;
+    height: 300;
+    resize: none;
+    font-size: 30;
+    border-radius: 10;
+    padding: 5;
+}
+
+.comments-panel-submit {
+    margin-top: 30;
+    text-align: center;
+    border: 1px solid #eee;
+    background-color: #3385ff;
+    color: white;
+    font-size: 40;
+    padding-top: 10;
+    padding-bottom: 10;
+    border-radius: 10;
+}
+</style>

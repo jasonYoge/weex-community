@@ -1,0 +1,116 @@
+<template>
+    <div class="cell" onappear="onShow" onclick="onHandleClick">
+        <div class="user">
+            <image class="user-img" src="{{author.avatar_url}}"></image>
+            <text class="user-txt">{{author.loginname}}</text>
+        </div>
+        <div class="title">
+            <div class="title-top">
+                <text>{{title}}</text>
+            </div>
+            <div class="title-bottom">
+                <text class="title-time">最近回复：{{lastReplyAt}}</text>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+.cell {
+    flex-direction: row;
+    opacity: 0;
+}
+
+.user {
+    flex: 0.25;
+    padding: 15;
+    overflow: hidden;
+}
+
+.user-img {
+    width: 120;
+    height: 120;
+    border-radius: 20;
+}
+
+.user-txt {
+    color: #aaa;
+    font-size: 22;
+    margin-top: 10;
+}
+
+.title {
+    flex: 1;
+    padding: 10;
+    padding-left: 0;
+}
+
+.title-top {
+    flex: 0.8;
+}
+
+.title-bottom {
+    flex: 0.2;
+    justify-content: flex-end;
+}
+
+.title-time {
+    text-align: left;
+    color: #aaa;
+}
+</style>
+
+<script>
+const animation = require('@weex-module/animation');
+const modal = require('@weex-module/modal');
+const navigator = require('@weex-module/navigator');
+const timeReform = require('./utils/baseUtil').timeReform;
+const getBaseUrl = require('./utils/getUrl');
+
+module.exports = {
+    data: {
+        author: {
+            avatar_url: '',
+            loginname: ''
+        },
+        create_at: '',
+        last_reply_at: '',
+        visit_count: 0,
+        top: false,
+        title: '',
+        topic_id: '',
+        url: ''
+    },
+    computed: {
+        lastReplyAt: {
+            get: function () {
+                let time = timeReform(this.last_reply_at);
+                return time;
+            }
+        }
+    },
+    methods: {
+        onShow: function (e) {
+            let target = e.target;
+            animation.transition(target, {
+                styles: {
+                    opacity: 1
+                },
+                duration: 300,
+                timingFunction: 'ease',
+                delay: 0
+            });
+        },
+        onHandleClick: function (e) {
+            let baseUrl = getBaseUrl(this.$getConfig().bundleUrl);
+            let url = baseUrl + 'article.js&id=' + this.topic_id;
+
+            let params = {
+                'url': url,
+                'animated': 'true'
+            };
+            navigator.push(params);
+        }
+    }
+}
+</script>

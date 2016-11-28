@@ -1,0 +1,41 @@
+<template>
+    <div if="{{show}}" class="wrapper" onclick="onHandleClick" id="wrapper">
+    </div>
+</template>
+
+<style>
+.wrapper {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+}
+</style>
+
+<script>
+const animation = require('@weex-module/animation');
+module.exports = {
+    methods: {
+        onHandleClick: function () {
+            this.$dispatch('hideSidebar');
+        }
+    },
+    data: {
+        show: false
+    },
+    created: function () {
+        let self = this;
+
+        this.$on('show', function () {
+            self.show = true;
+        });
+
+        this.$on('hide', function () {
+            self.show = false;
+        });
+    }
+}
+</script>
