@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <wxc-navpage background-color="#3385ff" title="Weex中文社区" left-item-src="http://192.168.1.240:3000/imgs/search.png" title-color="white"></wxc-navpage>
+    <wxc-navpage background-color="#3385ff" title="Weex中文社区" left-item-title="登录" title-color="white" left-item-color="white"></wxc-navpage>
     <topic-list></topic-list>
     <sidebar></sidebar>
     <wrapper></wrapper>
